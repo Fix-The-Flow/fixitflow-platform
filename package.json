@@ -1,0 +1,26 @@
+{
+  "name": "fixitflow",
+  "version": "1.0.0",
+  "description": "A playful, user-friendly troubleshooting platform for everyday problems",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-deps": "npm install && cd server && npm install && cd ../client && npm install",
+    "start": "cd server && npm start"
+  },
+  "keywords": [
+    "troubleshooting",
+    "guides",
+    "ebook",
+    "diy",
+    "tech-support"
+  ],
+  "author": "FixItFlow Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
