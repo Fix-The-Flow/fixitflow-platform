@@ -170,7 +170,7 @@ const AdminDashboard = () => {
 
           {/* Main Content */}
           <div className="flex-1">
-            {activeTab === 'overview' && <DashboardOverview stats={stats} isLoading={isLoading} />}
+            {activeTab === 'overview' && <DashboardOverview stats={stats} isLoading={isLoading} setActiveTab={setActiveTab} />}
             {activeTab === 'ebooks' && <AdminEbookManager />}
             {activeTab === 'ai' && <AdminAI />}
             {activeTab === 'guides' && <div className="p-6"><h2 className="text-2xl font-bold text-gray-900">Guide Management</h2><p className="text-gray-600 mt-2">Guide management interface coming soon...</p></div>}
@@ -184,7 +184,7 @@ const AdminDashboard = () => {
 };
 
 // Dashboard Overview Component
-const DashboardOverview = ({ stats, isLoading }) => {
+const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
   if (isLoading) {
     return (
       <div className="p-6">
