@@ -22,7 +22,6 @@ import GuidesPage from './pages/GuidesPage';
 import EbooksPage from './pages/EbooksPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import AdminAI from './pages/Admin/AdminAI';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 
 // Import placeholder components
@@ -34,12 +33,7 @@ import {
   DashboardPage,
   ProfilePage,
   CheckoutPage,
-  SearchPage,
-  AdminGuides,
-  AdminEbooks,
-  AdminUsers,
-  AdminCategories,
-  AdminAnalytics
+  SearchPage
 } from './pages/placeholders';
 
 // Protected route component

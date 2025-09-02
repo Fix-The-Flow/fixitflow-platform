@@ -10,7 +10,6 @@ import {
   Settings, 
   BookOpen, 
   Wrench,
-  ShoppingCart,
   BarChart3
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
