@@ -74,8 +74,21 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static('uploads'));
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fixitflow')
-.then(() => console.log('Connected to MongoDB'))
+const mongoUri = process.env.MONGODB_URI || process.env.mongodb_uri || 'mongodb://localhost:27017/fixitflow';
+mongoose.connect(mongoUri)
+.then(async () => {
+  console.log('Connected to MongoDB');
+  
+  // Set up admin user in production
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      const { setupProductionAdmin } = require('./scripts/setup-production-admin');
+      console.log('Setting up admin user...');
+    } catch (error) {
+      console.log('Admin setup not available');
+    }
+  }
+})
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
