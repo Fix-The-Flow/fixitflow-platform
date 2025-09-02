@@ -10,12 +10,12 @@ import {
   Settings,
   DollarSign,
   TrendingUp,
-  Eye,
-  Calendar,
   Award,
   Sparkles,
   LogOut,
-  Home
+  Home,
+  CheckCircle,
+  Crown
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
@@ -26,6 +26,9 @@ import { useNavigate } from 'react-router-dom';
 // Import admin components
 import AdminEbookManager from './AdminEbookManager';
 import AdminAI from './AdminAI';
+import TroubleshootingFlowManager from './TroubleshootingFlowManager';
+import UserManagement from './UserManagement';
+import MembershipManagement from '../../components/Admin/MembershipManagement';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -71,6 +74,12 @@ const AdminDashboard = () => {
       label: 'User Management', 
       icon: Users,
       description: 'Manage user accounts and permissions'
+    },
+    { 
+      id: 'membership', 
+      label: 'Membership Management', 
+      icon: Crown,
+      description: 'Manage subscriptions and pricing'
     },
     { 
       id: 'ai', 
@@ -173,8 +182,9 @@ const AdminDashboard = () => {
             {activeTab === 'overview' && <DashboardOverview stats={stats} isLoading={isLoading} setActiveTab={setActiveTab} />}
             {activeTab === 'ebooks' && <AdminEbookManager />}
             {activeTab === 'ai' && <AdminAI />}
-            {activeTab === 'guides' && <div className="p-6"><h2 className="text-2xl font-bold text-gray-900">Guide Management</h2><p className="text-gray-600 mt-2">Guide management interface coming soon...</p></div>}
-            {activeTab === 'users' && <div className="p-6"><h2 className="text-2xl font-bold text-gray-900">User Management</h2><p className="text-gray-600 mt-2">User management interface coming soon...</p></div>}
+            {activeTab === 'guides' && <TroubleshootingFlowManager />}
+            {activeTab === 'users' && <UserManagement />}
+            {activeTab === 'membership' && <MembershipManagement />}
             {activeTab === 'analytics' && <div className="p-6"><h2 className="text-2xl font-bold text-gray-900">Analytics</h2><p className="text-gray-600 mt-2">Analytics dashboard coming soon...</p></div>}
           </div>
         </div>
@@ -190,8 +200,8 @@ const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
       <div className="p-6">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+            {[...Array(6)].map((_, i) => (
               <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
             ))}
           </div>
@@ -204,15 +214,15 @@ const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Dashboard Overview
+          FixItFlow Admin Dashboard
         </h1>
         <p className="text-gray-600">
-          Welcome back! Here's what's happening with your FixItFlow platform.
+          Manage your dual-purpose platform: Troubleshooting Solutions & Digital eBook Store
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      {/* Platform Overview Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -224,6 +234,17 @@ const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
               <p className="text-2xl font-bold text-gray-900">
                 {stats?.overview?.totalUsers || 0}
               </p>
+              <div className="flex items-center text-xs text-gray-500 mt-1">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                  Free: {stats?.overview?.freeUsers || 0}
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 ml-1">
+                  Premium: {stats?.overview?.premiumUsers || 0}
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 ml-1">
+                  Pro: {stats?.overview?.proUsers || 0}
+                </span>
+              </div>
             </div>
             <Users className="w-8 h-8 text-blue-600" />
           </div>
@@ -237,12 +258,15 @@ const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Published Guides</p>
+              <p className="text-sm font-medium text-gray-600">Troubleshooting Flows</p>
               <p className="text-2xl font-bold text-gray-900">
-                {stats?.overview?.totalGuides || 0}
+                {stats?.overview?.totalFlows || 0}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {stats?.overview?.activeFlows || 0} active • {stats?.overview?.totalCompletions || 0} completions
               </p>
             </div>
-            <FileText className="w-8 h-8 text-green-600" />
+            <Brain className="w-8 h-8 text-green-600" />
           </div>
         </motion.div>
 
@@ -258,6 +282,9 @@ const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
               <p className="text-2xl font-bold text-gray-900">
                 {stats?.overview?.totalEbooks || 0}
               </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {stats?.overview?.ebookSales || 0} total sales
+              </p>
             </div>
             <BookOpen className="w-8 h-8 text-purple-600" />
           </div>
@@ -271,14 +298,183 @@ const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+              <p className="text-sm font-medium text-gray-600">Revenue</p>
               <p className="text-2xl font-bold text-gray-900">
                 ${(stats?.overview?.totalRevenue || 0).toFixed(2)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                ${(stats?.overview?.monthlyRevenue || 0).toFixed(2)} this month
               </p>
             </div>
             <DollarSign className="w-8 h-8 text-yellow-600" />
           </div>
         </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white rounded-lg shadow-sm p-6 border border-gray-200"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Subscriptions</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {(stats?.overview?.premiumUsers || 0) + (stats?.overview?.proUsers || 0)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                ${(stats?.overview?.subscriptionRevenue || 0).toFixed(2)} MRR
+              </p>
+            </div>
+            <Award className="w-8 h-8 text-indigo-600" />
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-white rounded-lg shadow-sm p-6 border border-gray-200"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Success Rate</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats?.overview?.successRate || 0}%
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Troubleshooting completion rate
+              </p>
+            </div>
+            <TrendingUp className="w-8 h-8 text-emerald-600" />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Dual Business Sections */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+        {/* Troubleshooting Platform Section */}
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-blue-500 to-green-500 rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold mb-2">Troubleshooting Platform</h2>
+                <p className="text-blue-100">Help users solve everyday problems</p>
+              </div>
+              <Brain className="w-12 h-12 text-blue-100" />
+            </div>
+          </div>
+          
+          {/* Troubleshooting Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Active Flows</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {stats?.troubleshooting?.activeFlows || 0}
+                  </p>
+                </div>
+                <FileText className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Completions Today</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {stats?.troubleshooting?.todayCompletions || 0}
+                  </p>
+                </div>
+                <CheckCircle className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Popular Categories */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Problem Categories</h3>
+            <div className="space-y-3">
+              {stats?.troubleshooting?.topCategories?.slice(0, 5).map((category, index) => (
+                <div key={category._id} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center text-white text-sm font-bold">
+                      {index + 1}
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{category.name}</span>
+                  </div>
+                  <span className="text-sm text-gray-600">{category.count} uses</span>
+                </div>
+              )) || (
+                <p className="text-sm text-gray-500">No data available</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* eBook Store Section */}
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold mb-2">Digital eBook Store</h2>
+                <p className="text-purple-100">Create and sell knowledge products</p>
+              </div>
+              <BookOpen className="w-12 h-12 text-purple-100" />
+            </div>
+          </div>
+          
+          {/* eBook Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Published eBooks</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {stats?.ebooks?.published || 0}
+                  </p>
+                </div>
+                <BookOpen className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Sales Today</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {stats?.ebooks?.todaySales || 0}
+                  </p>
+                </div>
+                <DollarSign className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          {/* Best Selling eBooks */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Best Selling eBooks</h3>
+            <div className="space-y-3">
+              {stats?.ebooks?.bestSellers?.slice(0, 5).map((ebook, index) => (
+                <div key={ebook._id} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-900 line-clamp-1">{ebook.title}</span>
+                      <span className="text-xs text-gray-500">${ebook.price}</span>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-600">{ebook.sales} sales</span>
+                </div>
+              )) || (
+                <p className="text-sm text-gray-500">No sales data available</p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Recent Activity */}
@@ -392,7 +588,7 @@ const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
       {/* Quick Actions */}
       <div className="mt-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <button
             onClick={() => setActiveTab('ebooks')}
             className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:border-primary-300 hover:shadow-md transition-all duration-200 text-left"
@@ -402,6 +598,19 @@ const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
               <div>
                 <h4 className="font-medium text-gray-900">Create New eBook</h4>
                 <p className="text-sm text-gray-500">Start writing your next eBook</p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('guides')}
+            className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-left"
+          >
+            <div className="flex items-center space-x-3">
+              <FileText className="w-8 h-8 text-blue-600" />
+              <div>
+                <h4 className="font-medium text-gray-900">Manage Guides</h4>
+                <p className="text-sm text-gray-500">Create or import guides via CSV</p>
               </div>
             </div>
           </button>
@@ -437,120 +646,5 @@ const DashboardOverview = ({ stats, isLoading, setActiveTab }) => {
   );
 };
 
-// Main Admin Component with Tab Navigation
-const AdminMain = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-
-  const navigation = [
-    { 
-      id: 'overview', 
-      label: 'Overview', 
-      icon: BarChart3
-    },
-    { 
-      id: 'ebooks', 
-      label: 'eBooks', 
-      icon: BookOpen
-    },
-    { 
-      id: 'guides', 
-      label: 'Guides', 
-      icon: FileText
-    },
-    { 
-      id: 'users', 
-      label: 'Users', 
-      icon: Users
-    },
-    { 
-      id: 'ai', 
-      label: 'AI Tools', 
-      icon: Brain
-    }
-  ];
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return <AdminDashboard />;
-      case 'ebooks':
-        return <AdminEbookManager />;
-      case 'ai':
-        return <AdminAI />;
-      case 'guides':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Guide Management</h2>
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Guide Management</h3>
-              <p className="text-gray-600">Guide management interface coming soon...</p>
-            </div>
-          </div>
-        );
-      case 'users':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">User Management</h2>
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">User Management</h3>
-              <p className="text-gray-600">User management interface coming soon...</p>
-            </div>
-          </div>
-        );
-      default:
-        return <AdminDashboard />;
-    }
-  };
-
-  return (
-    <>
-      <Helmet>
-        <title>Admin Dashboard - FixItFlow</title>
-      </Helmet>
-
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex">
-          {/* Sidebar */}
-          <div className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen">
-            <div className="p-6">
-              <div className="flex items-center space-x-2 mb-8">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                  <Settings className="w-4 h-4 text-white" />
-                </div>
-                <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
-              </div>
-
-              <nav className="space-y-2">
-                {navigation.map(({ id, label, icon: Icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => setActiveTab(id)}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                      activeTab === id
-                        ? 'bg-primary-50 text-primary-700 border border-primary-200'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${
-                      activeTab === id ? 'text-primary-600' : 'text-gray-400'
-                    }`} />
-                    <span className="font-medium">{label}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1">
-            {renderContent()}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
 
 export default AdminDashboard;

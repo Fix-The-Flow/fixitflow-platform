@@ -34,7 +34,7 @@ const AdminEbookManager = () => {
   const queryClient = useQueryClient();
 
   // Fetch eBooks
-  const { data: ebooksData, isLoading } = useQuery(
+  const { data: ebooksData, isLoading, error } = useQuery(
     ['admin-ebooks', currentPage, filters],
     async () => {
       const params = new URLSearchParams({
@@ -44,6 +44,13 @@ const AdminEbookManager = () => {
       });
       const response = await axios.get(`/api/admin/ebooks?${params}`);
       return response.data;
+    },
+    {
+      retry: 1,
+      onError: (error) => {
+        console.error('Error fetching ebooks:', error);
+        toast.error('Failed to load ebooks');
+      }
     }
   );
 
@@ -487,14 +494,45 @@ const EbookEditorModal = ({ ebook, categories, onClose, onSave }) => {
     setIsSaving(true);
 
     try {
+      // Log the request details for debugging
+      console.log('Submitting ebook data:', {
+        isEdit: !!ebook,
+        formData,
+        url: ebook ? `/api/admin/ebooks/${ebook._id}` : '/api/admin/ebooks',
+        method: ebook ? 'put' : 'post'
+      });
+
       const url = ebook ? `/api/admin/ebooks/${ebook._id}` : '/api/admin/ebooks';
       const method = ebook ? 'put' : 'post';
       
+      // Validate required fields before sending
+      if (!formData.title || !formData.description || !formData.category) {
+        throw new Error('Please fill in all required fields (title, description, category)');
+      }
+
       const response = await axios[method](url, formData);
       toast.success(response.data.message);
       onSave();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to save eBook');
+      console.error('Ebook save error:', {
+        error,
+        response: error.response,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      
+      if (error.message.includes('fill in all required fields')) {
+        toast.error(error.message);
+      } else if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
+        toast.error('Connection error. Please check if you are logged in as an admin and the server is running.');
+      } else if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please log in again.');
+      } else if (error.response?.status === 403) {
+        toast.error('Access denied. Admin privileges required.');
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to save eBook');
+      }
     } finally {
       setIsSaving(false);
     }

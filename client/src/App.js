@@ -14,12 +14,14 @@ import { MascotProvider } from './contexts/MascotContext';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import MascotAssistant from './components/Mascot/MascotAssistant';
+import UserDebug from './components/Debug/UserDebug';
 
 // Pages
 import HomePage from './pages/HomePage';
 import GuidesPage from './pages/GuidesPage';
 import EbooksPage from './pages/EbooksPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import AdminAI from './pages/Admin/AdminAI';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 
@@ -29,7 +31,6 @@ import {
   CategoriesPage,
   CategoryDetailPage,
   EbookDetailPage,
-  RegisterPage,
   DashboardPage,
   ProfilePage,
   CheckoutPage,
@@ -117,6 +118,7 @@ function App() {
                         
                         <Footer />
                         <MascotAssistant />
+                        <UserDebug />
                       </div>
                     } />
                   </Routes>

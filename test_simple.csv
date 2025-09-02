@@ -1,0 +1,4 @@
+title,description,category,difficulty,estimatedTime,severity,tools,materials,tags,steps,safetyTips,published
+Fix Slow Internet,Troubleshoot slow internet speeds,Technology,beginner,15 minutes,medium,none,none,internet wifi slow,"Check internet speed;Restart router;Contact ISP",none,true
+Unclog Kitchen Sink,Remove sink blockages,Plumbing,beginner,20 minutes,medium,plunger,baking soda,sink clog drain,"Remove standing water;Try plunger;Use baking soda",Wear gloves,true
+Reset WiFi Password,Recover WiFi password,Technology,beginner,10 minutes,low,none,none,wifi password reset,"Find router label;Access router settings;Change password",none,true

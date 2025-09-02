@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { User, Guide, Ebook, Category, Purchase, Analytics, MascotTip } = require('../models');
 const { authenticate, requireAdmin } = require('../middleware/auth');
+const { upload, parseCsvFile, createGuidesFromCsv, generateCsvTemplate, cleanupFile } = require('../services/csvUploadService');
 
 const router = express.Router();
 
@@ -545,6 +546,201 @@ router.delete('/mascot-tips/:id', authenticate, requireAdmin, async (req, res) =
   } catch (error) {
     console.error('Delete mascot tip error:', error);
     res.status(500).json({ message: 'Server error during tip deletion' });
+  }
+});
+
+// CSV Bulk Import Routes
+
+// Download CSV template for guides
+router.get('/guides/csv-template', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const templatePath = await generateCsvTemplate();
+    res.download(templatePath, 'guides-template.csv', (err) => {
+      if (err) {
+        console.error('Template download error:', err);
+        res.status(500).json({ message: 'Error downloading template' });
+      }
+    });
+  } catch (error) {
+    console.error('Generate template error:', error);
+    res.status(500).json({ message: 'Error generating CSV template' });
+  }
+});
+
+// Upload and parse CSV file (preview)
+router.post('/guides/csv-preview', authenticate, requireAdmin, upload, async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No CSV file uploaded' });
+    }
+
+    const { data, errors } = await parseCsvFile(req.file.path);
+    
+    res.json({
+      message: 'CSV file parsed successfully',
+      preview: {
+        totalRows: data.length,
+        validRows: data.length,
+        errors: errors,
+        data: data.slice(0, 10) // Show first 10 rows for preview
+      },
+      fileName: req.file.filename
+    });
+  } catch (error) {
+    console.error('CSV preview error:', error);
+    if (req.file) {
+      await cleanupFile(req.file.path);
+    }
+    res.status(500).json({ message: 'Error parsing CSV file' });
+  }
+});
+
+// Get troubleshooting flows analytics
+router.get('/flows/analytics', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { period = '30d' } = req.query;
+    
+    let dateFilter = {};
+    const now = new Date();
+    
+    switch (period) {
+      case '7d':
+        dateFilter = { createdAt: { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) } };
+        break;
+      case '30d':
+        dateFilter = { createdAt: { $gte: new Date(now - 30 * 24 * 60 * 60 * 1000) } };
+        break;
+      case '90d':
+        dateFilter = { createdAt: { $gte: new Date(now - 90 * 24 * 60 * 60 * 1000) } };
+        break;
+      case '1y':
+        dateFilter = { createdAt: { $gte: new Date(now - 365 * 24 * 60 * 60 * 1000) } };
+        break;
+    }
+
+    const [
+      totalFlows,
+      publishedFlows,
+      totalViews,
+      totalCompletions,
+      flowsByCategory,
+      flowsByDifficulty,
+      recentFlows
+    ] = await Promise.all([
+      Guide.countDocuments(),
+      Guide.countDocuments({ isPublished: true }),
+      Guide.aggregate([
+        { $group: { _id: null, total: { $sum: '$views' } } }
+      ]),
+      Guide.aggregate([
+        { $group: { _id: null, total: { $sum: '$completions' } } }
+      ]),
+      Guide.aggregate([
+        { $match: { isPublished: true } },
+        { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'categoryData' } },
+        { $unwind: '$categoryData' },
+        { $group: { _id: '$categoryData.name', count: { $sum: 1 }, views: { $sum: '$views' } } },
+        { $sort: { count: -1 } }
+      ]),
+      Guide.aggregate([
+        { $match: { isPublished: true } },
+        { $group: { _id: '$difficulty', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]),
+      Guide.find({ isPublished: true, ...dateFilter })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .populate('category', 'name')
+        .select('title views completions createdAt category')
+    ]);
+
+    const analytics = {
+      overview: {
+        totalFlows,
+        publishedFlows,
+        totalViews: totalViews[0]?.total || 0,
+        totalCompletions: totalCompletions[0]?.total || 0,
+        averageRating: 4.2 // Could calculate this properly later
+      },
+      breakdown: {
+        byCategory: flowsByCategory,
+        byDifficulty: flowsByDifficulty
+      },
+      recent: recentFlows
+    };
+
+    res.json({ analytics });
+  } catch (error) {
+    console.error('Flows analytics error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get troubleshooting categories (alias for categories)
+router.get('/troubleshooting-categories', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const categories = await Category.find()
+      .sort({ name: 1 });
+    
+    // Add count of guides per category
+    const categoriesWithCounts = await Promise.all(
+      categories.map(async (category) => {
+        const guideCount = await Guide.countDocuments({ 
+          category: category._id, 
+          isPublished: true 
+        });
+        return {
+          ...category.toObject(),
+          guideCount
+        };
+      })
+    );
+
+    res.json({ categories: categoriesWithCounts });
+  } catch (error) {
+    console.error('Get troubleshooting categories error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Import guides from CSV file
+router.post('/guides/csv-import', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { fileName } = req.body;
+    
+    if (!fileName) {
+      return res.status(400).json({ message: 'File name is required' });
+    }
+
+    const filePath = `uploads/csv/${fileName}`;
+    const { data, errors } = await parseCsvFile(filePath);
+
+    if (errors.length > 0) {
+      await cleanupFile(filePath);
+      return res.status(400).json({ 
+        message: 'CSV file contains errors', 
+        errors 
+      });
+    }
+
+    const results = await createGuidesFromCsv(data, req.user._id);
+    
+    // Clean up the uploaded file
+    await cleanupFile(filePath);
+
+    res.json({
+      message: 'CSV import completed',
+      results: {
+        totalProcessed: data.length,
+        successful: results.success.length,
+        failed: results.errors.length,
+        successList: results.success,
+        errorList: results.errors
+      }
+    });
+  } catch (error) {
+    console.error('CSV import error:', error);
+    res.status(500).json({ message: 'Error importing guides from CSV' });
   }
 });
 
