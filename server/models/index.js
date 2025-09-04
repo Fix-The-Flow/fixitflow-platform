@@ -235,8 +235,7 @@ const ebookSchema = new mongoose.Schema({
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',
-    required: true
+    ref: 'Category'
   },
   price: {
     type: Number,

@@ -62,18 +62,58 @@ OR
 
 ## 🛠️ IMPORTANT COMMANDS
 
-### To Start Locally
-```bash
-# Backend Server
+### 🚀 How to Start Your Local Servers
+
+#### Method 1: Automatic Startup (Easiest)
+```powershell
+# From your main project folder:
+cd C:\Users\taylo\FixItFlow
+
+# Start backend server (opens in new window)
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'C:\Users\taylo\FixItFlow\server'; npm run dev"
+
+# Start frontend server (opens in new window)  
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'C:\Users\taylo\FixItFlow\client'; npm start"
+
+# Open your app automatically
+start http://localhost:3000
+```
+
+#### Method 2: Manual Startup
+```powershell
+# Backend Server (in one PowerShell window)
 cd C:\Users\taylo\FixItFlow\server
 npm run dev
 
-# Frontend Server  
+# Frontend Server (in another PowerShell window)
 cd C:\Users\taylo\FixItFlow\client
 npm start
 ```
 
-### To Deploy
+#### Method 3: One Command Startup
+```powershell
+# From main project folder - starts both servers
+cd C:\Users\taylo\FixItFlow
+npm run dev
+```
+
+### 📱 Your App URLs (Local)
+- **Main App**: http://localhost:3000
+- **Backend API**: http://localhost:5000/api
+- **Admin Panel**: http://localhost:3000/admin (after login)
+
+### 🔧 Server Management
+```powershell
+# Check if servers are running
+netstat -ano | findstr :3000
+netstat -ano | findstr :5000
+
+# Stop servers (close PowerShell windows or Ctrl+C)
+# Or kill processes:
+taskkill /f /im node.exe
+```
+
+### 🌐 To Deploy to Live Site
 ```bash
 cd C:\Users\taylo\FixItFlow
 git add .

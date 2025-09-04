@@ -224,7 +224,6 @@ router.get('/ebooks', authenticate, requireAdmin, async (req, res) => {
 router.post('/ebooks', authenticate, requireAdmin, [
   body('title').notEmpty().withMessage('Title is required'),
   body('description').notEmpty().withMessage('Description is required'),
-  body('category').isMongoId().withMessage('Valid category is required'),
   body('price').isNumeric().withMessage('Price must be a number')
 ], async (req, res) => {
   try {
@@ -280,7 +279,6 @@ router.get('/ebooks/:id', authenticate, requireAdmin, async (req, res) => {
 router.put('/ebooks/:id', authenticate, requireAdmin, [
   body('title').optional().notEmpty().withMessage('Title cannot be empty'),
   body('description').optional().notEmpty().withMessage('Description cannot be empty'),
-  body('category').optional().isMongoId().withMessage('Valid category is required'),
   body('price').optional().isNumeric().withMessage('Price must be a number')
 ], async (req, res) => {
   try {

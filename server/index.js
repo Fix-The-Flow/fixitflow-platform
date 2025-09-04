@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
@@ -50,6 +51,7 @@ app.use(morgan('combined'));
 const allowedOrigins = [
   process.env.CLIENT_URL,
   'http://localhost:3000',
+  'http://localhost:5001',
   'https://client-mjm6x1hrj-terrytaylorwilliams-1078s-projects.vercel.app',
   'https://fixitflow.online',
   'https://www.fixitflow.online'
@@ -72,6 +74,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files
 app.use('/uploads', express.static('uploads'));
+
+// Serve React build files
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Database connection
 const mongoUri = process.env.MONGODB_URI || process.env.mongodb_uri || 'mongodb://localhost:27017/fixitflow';
@@ -111,6 +116,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Serve React app for all non-API routes
+app.get('*', (req, res) => {
+  // Check if build folder exists
+  const buildIndex = path.join(__dirname, 'build', 'index.html');
+  const fs = require('fs');
+  if (fs.existsSync(buildIndex)) {
+    res.sendFile(buildIndex);
+  } else {
+    res.status(404).json({ message: 'Frontend build not found. Run npm run build in client folder.' });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -118,11 +135,6 @@ app.use((err, req, res, next) => {
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
   });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Route not found' });
 });
 
 const PORT = process.env.PORT || 5000;

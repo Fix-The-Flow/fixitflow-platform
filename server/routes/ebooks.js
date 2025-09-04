@@ -165,7 +165,6 @@ router.post('/', authenticate, requireAdmin, [
   body('title').notEmpty().withMessage('eBook title is required'),
   body('slug').notEmpty().withMessage('eBook slug is required'),
   body('description').notEmpty().withMessage('eBook description is required'),
-  body('category').notEmpty().withMessage('Category is required'),
   body('price').isFloat({ min: 0 }).withMessage('Price must be a valid number')
 ], async (req, res) => {
   try {
@@ -185,11 +184,6 @@ router.post('/', authenticate, requireAdmin, [
       });
     }
 
-    // Validate category exists
-    const category = await Category.findById(req.body.category);
-    if (!category) {
-      return res.status(400).json({ message: 'Invalid category' });
-    }
 
     const ebook = new Ebook({
       ...req.body,
