@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 const SubscriptionSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { handlePaymentSuccess, hasPremiumAccess } = useAuth();
+  const { handlePaymentSuccess } = useAuth();
   const [processing, setProcessing] = useState(true);
   const [success, setSuccess] = useState(false);
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);

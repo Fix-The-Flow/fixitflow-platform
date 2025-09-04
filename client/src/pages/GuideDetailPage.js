@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 const GuideDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { hasPremiumAccess, hasFeatureAccess, subscriptionToken, isAuthenticated } = useAuth();
+  const { hasFeatureAccess, subscriptionToken } = useAuth();
   
   const [guide, setGuide] = useState(null);
   const [loading, setLoading] = useState(true);
