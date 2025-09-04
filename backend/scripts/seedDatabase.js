@@ -25,48 +25,70 @@ const sampleUsers = [
   {
     firstName: 'John',
     lastName: 'Admin',
+    username: 'admin',
     email: 'admin@fixitflow.com',
     password: 'Admin123!',
     role: 'admin',
     isEmailVerified: true,
     subscription: {
-      plan: 'premium',
+      plan: 'annual',
       status: 'active',
       startDate: new Date(),
-      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year
+      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+      features: {
+        complexGuides: true,
+        aiChat: true,
+        videoChat: true,
+        linkedVideos: true
+      }
     }
   },
   {
     firstName: 'Jane',
     lastName: 'Moderator',
+    username: 'moderator',
     email: 'mod@fixitflow.com',
     password: 'Mod123!',
     role: 'moderator',
     isEmailVerified: true,
     subscription: {
-      plan: 'premium',
+      plan: 'monthly',
       status: 'active',
       startDate: new Date(),
-      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      features: {
+        complexGuides: true,
+        aiChat: true,
+        videoChat: true,
+        linkedVideos: true
+      }
     }
   },
   {
     firstName: 'Mike',
     lastName: 'Premium',
+    username: 'mike_premium',
     email: 'premium@example.com',
     password: 'Premium123!',
     role: 'user',
     isEmailVerified: true,
     subscription: {
-      plan: 'premium',
+      plan: 'monthly',
       status: 'active',
       startDate: new Date(),
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      features: {
+        complexGuides: true,
+        aiChat: true,
+        videoChat: true,
+        linkedVideos: true
+      }
     }
   },
   {
     firstName: 'Sarah',
     lastName: 'Free',
+    username: 'sarah_free',
     email: 'free@example.com',
     password: 'Free123!',
     role: 'user',

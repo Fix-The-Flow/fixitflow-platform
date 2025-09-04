@@ -25,9 +25,9 @@ import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import SubscriptionSuccess from './pages/SubscriptionSuccess';
 
-// Import placeholder components
+// Import pages
+import GuideDetailPage from './pages/GuideDetailPage';
 import {
-  GuideDetailPage,
   CategoriesPage,
   CategoryDetailPage,
   EbookDetailPage,
