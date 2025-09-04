@@ -32,8 +32,8 @@ const GuideDetailPage = () => {
         headers['x-subscription-token'] = subscriptionToken;
       }
       
-      const response = await axios.get(`/api/troubleshooting/${slug}`, { headers });
-      setGuide(response.data.article);
+      const response = await axios.get(`/api/guides/${slug}`, { headers });
+      setGuide(response.data.guide);
     } catch (err) {
       console.error('Error fetching guide:', err);
       
