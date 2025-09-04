@@ -79,7 +79,7 @@ const userSchema = new mongoose.Schema({
   subscription: {
     plan: {
       type: String,
-      enum: ['free', 'premium'],
+      enum: ['free', 'monthly', 'daily', 'annual'],
       default: 'free'
     },
     status: {
@@ -95,6 +95,25 @@ const userSchema = new mongoose.Schema({
     autoRenew: {
       type: Boolean,
       default: true
+    },
+    // Premium features access
+    features: {
+      complexGuides: {
+        type: Boolean,
+        default: false
+      },
+      aiChat: {
+        type: Boolean,
+        default: false
+      },
+      videoChat: {
+        type: Boolean,
+        default: false
+      },
+      linkedVideos: {
+        type: Boolean,
+        default: false
+      }
     }
   },
 
@@ -189,7 +208,7 @@ userSchema.virtual('fullName').get(function() {
 
 // Virtual for subscription status
 userSchema.virtual('isPremium').get(function() {
-  return this.subscription.plan === 'premium' && 
+  return ['monthly', 'daily', 'annual'].includes(this.subscription.plan) && 
          this.subscription.status === 'active' && 
          (!this.subscription.endDate || this.subscription.endDate > new Date());
 });
@@ -304,6 +323,32 @@ userSchema.methods.updateLastLogin = function(ip, userAgent) {
 // Method to check if user has premium features
 userSchema.methods.hasPremiumAccess = function() {
   return this.isPremium || this.isInTrial;
+};
+
+// Method to check specific premium features
+userSchema.methods.hasFeature = function(feature) {
+  if (this.subscription.plan === 'free') return false;
+  return this.subscription.features[feature] || false;
+};
+
+// Method to update subscription plan with features
+userSchema.methods.updateSubscriptionPlan = function(plan, duration = null) {
+  const features = {
+    complexGuides: ['monthly', 'daily', 'annual'].includes(plan),
+    aiChat: ['monthly', 'daily', 'annual'].includes(plan),
+    videoChat: ['monthly', 'daily', 'annual'].includes(plan),
+    linkedVideos: ['monthly', 'daily', 'annual'].includes(plan)
+  };
+
+  const endDate = duration ? new Date(Date.now() + duration) : null;
+  
+  this.subscription.plan = plan;
+  this.subscription.features = features;
+  this.subscription.status = 'active';
+  this.subscription.startDate = new Date();
+  if (endDate) this.subscription.endDate = endDate;
+  
+  return this.save();
 };
 
 // Method to update subscription

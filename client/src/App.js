@@ -23,6 +23,7 @@ import EbooksPage from './pages/EbooksPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/Admin/AdminDashboard';
+import SubscriptionSuccess from './pages/SubscriptionSuccess';
 
 // Import placeholder components
 import {
@@ -90,6 +91,8 @@ function App() {
                             <Route path="/search" element={<SearchPage />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/register" element={<RegisterPage />} />
+                            <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+                            <Route path="/subscription/cancel" element={<HomePage />} />
                             
                             {/* Protected user routes */}
                             <Route path="/dashboard" element={
